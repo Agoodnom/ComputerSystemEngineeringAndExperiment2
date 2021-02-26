@@ -1,0 +1,151 @@
+##RS_FLIP_FLOP##
+---------verilog---------
+~~~ver_1
+module RS_FF(CLK, R, S, Q, NQ);
+input CLK, R, S;
+output Q, NQ;
+reg Q, NQ;
+initial begin
+Q=0;
+NQ=0;
+end
+always @(posedge CLK) begin
+    if (R) begin
+    Q = !(R|NQ);
+    NQ = !(S|Q);
+    end
+    else begin
+    NQ = !(S|Q);
+    Q = !(R|NQ);
+    end
+end    
+endmodule
+
+~~~ver_2
+module RS_FF(CLK, R, S, Q, NQ);
+input CLK, R, S;
+output Q, NQ;
+reg Q, NQ;
+initial begin
+Q=0;
+NQ=0;
+end
+always @(posedge CLK) begin
+    if (R==0 & S==1) begin
+    Q <= 1;
+    NQ <= 0;
+    end
+    else if (R==1 & S==0) begin
+    Q <= 0;
+    NQ <= 1;
+    end
+    else if (R==0 & S==0) begin
+    Q <= Q;
+    NQ <= NQ;
+    end
+    else begin
+    Q <= 1;
+    NQ <= 1;
+    end
+end    
+endmodule
+----------sim------------
+
+module RS_FF_tb();
+reg CLK, R, S;
+wire Q, NQ;
+RS_FF connect(CLK, R, S, Q, NQ);
+initial begin
+CLK = 0;
+R = 0; S = 1;
+S <= #20 0;
+R <= #40 1;
+R <= #60 0;
+R <= #80 1;
+S <= #100 1;
+end
+always CLK = #10 ~CLK;
+endmodule
+
+##D_FF##
+
+---------verilog------------
+
+module D_FF(Q,NQ,D,CLK);
+input D,CLK;
+output Q,NQ;
+reg Q,NQ;
+initial begin
+Q=0;
+NQ=0;
+end
+always @(posedge CLK) begin
+    Q <= D;
+    NQ <= ~D;
+end
+endmodule
+
+-----------sim------------
+
+module D_FF_tb();
+reg d, clk;
+wire q, qb;
+D_FF con(q, qb, d, clk);
+initial begin
+    d=0; clk=0;
+end
+always clk = #5 ~clk;
+always d = #10 ~d;
+endmodule
+
+
+##JK_FF##
+
+---------verilog----------
+
+module JK_FF(J,K,Q,NQ,CLK);
+input J,K,CLK;
+output Q,NQ;
+reg Q,NQ;
+initial begin
+Q=0;
+NQ=0;
+end
+
+always @(posedge CLK) begin
+    if (J==0 & K==0) begin
+        Q <= Q;
+        NQ <= NQ;
+    end
+    else if (J==1 & K==0) begin
+        Q <= 1;
+        NQ <= 0;
+    end
+    else if (J==0 & K==1) begin
+        Q <= 0;
+        NQ <= 1;
+    end
+    else begin
+        Q <= ~Q;
+        NQ <= ~NQ;
+    end
+end
+endmodule
+
+---------sim------------
+
+module JK_FF_tb();
+reg j,k,clk;
+wire q,qb;
+JK_FF connect(j,k,q,qb,clk);
+initial begin
+clk=0; j=1; k=0;
+j = #10 0;
+k = #10 1;
+k = #10 0;
+j = #10 1; k = 1;
+end;
+always clk = #5 ~clk;
+endmodule
+
+set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets {CLK_IBUF}]
